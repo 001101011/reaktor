@@ -1,32 +1,50 @@
 #include <Wire.h>
 #include <L3G.h>
+#include <Adafruit_BMP085.h>
+
 
 L3G gyro;
+Adafruit_BMP085 bmp;
 
 // m - Member g - Gloobal a - Atrbute 
 
 struct ReactorReadings
 {
-  int mGyroX;
-  int mGyroY;
-  int mGyroZ;
+  int32_t mGyroX;
+  int32_t mGyroY;
+  int32_t mGyroZ;
+  float mBarT;
+  int32_t mBarP;
 };
 
 ReactorReadings gReactorReadings;
 
-void PutGyroData(ReactorReadings* aRR, int aX, int aY, int aZ)
+void PutGyroData(ReactorReadings* aRR, int32_t aX, int32_t aY, int32_t aZ)
 {
   aRR->mGyroX = aX;
   aRR->mGyroY = aY;
   aRR->mGyroZ = aZ;
 }
+
+void  PutBarData(ReactorReadings* aRR, float aT, int32_t aP)
+{
+  aRR->mBarT = aT;
+  aRR->mBarP = aP;
+}
+
 void SendData(ReactorReadings* aRR)
 {
    Serial.print(aRR->mGyroX);
-    Serial.print(", ");
+   Serial.print(", ");
    Serial.print(aRR->mGyroY);
-    Serial.print(", ");
+   Serial.print(", ");
    Serial.print(aRR->mGyroZ);
+   Serial.print(", ");
+   
+   Serial.print(aRR->mBarT);
+   Serial.print(", ");
+   Serial.print(aRR->mBarP);
+    
    Serial.print('\n');
 }
 void setup() {
@@ -38,10 +56,16 @@ void setup() {
     Serial.println("Failed to autodetect gyro type!");
     while (1);
   }
+  if (!bmp.begin()) {
+    Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+    while (1) {}
+  }
 }
+
 void loop() {
   gyro.read();
-    PutGyroData(&gReactorReadings, gyro.g.x, gyro.g.y, gyro.g.z);
-    SendData(&gReactorReadings);  
+  PutGyroData(&gReactorReadings, (int)gyro.g.x, (int)gyro.g.y, (int)gyro.g.z);
+  PutBarData(&gReactorReadings, bmp.readTemperature(), bmp.readPressure());
+  SendData(&gReactorReadings);  
   delay(100);
 }
