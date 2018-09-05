@@ -13,7 +13,7 @@ struct ReactorReadings
   int32_t mGyroX;
   int32_t mGyroY;
   int32_t mGyroZ;
-  float mBarT;
+  float mBarT;  //zmienic aby nie było zmieno przecinkowej
   int32_t mBarP;
 };
 
@@ -64,7 +64,7 @@ void setup() {
 
 void loop() {
   gyro.read();
-  PutGyroData(&gReactorReadings, (int)gyro.g.x, (int)gyro.g.y, (int)gyro.g.z);
+  PutGyroData(&gReactorReadings, (int32_t)gyro.g.x, (int32_t)gyro.g.y, (int32_t)gyro.g.z);
   PutBarData(&gReactorReadings, bmp.readTemperature(), bmp.readPressure());
   SendData(&gReactorReadings);  
   delay(100);
